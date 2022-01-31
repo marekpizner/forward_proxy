@@ -26,7 +26,7 @@ func main() {
 		print(err)
 		return
 	}
-	cache := cache.NewInMemorry("./cache/cache_1")
+	cache := cache.NewInMemorry("./cache_dir/cache_1")
 	cache.Add("aa", exampleBytes)
 
 	fmt.Println(string(exampleBytes))
