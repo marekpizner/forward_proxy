@@ -1,8 +1,8 @@
 package cache
 
 import (
+	"bytes"
 	"errors"
-	"fmt"
 	"os"
 )
 
@@ -15,32 +15,53 @@ type InMemorry struct {
 	filePath string
 }
 
-func fileExist(filepath string) (bool, error) {
+func fileExist(filepath string) error {
 	if _, err := os.Stat(filepath); err == nil {
-		return true, err
+		_, err := os.OpenFile(filepath, os.O_RDWR, 0644)
+		return err
 	} else if errors.Is(err, os.ErrNotExist) {
 		_, err := os.Create(filepath)
-		return true, err
+		return err
 	} else {
-		return false, err
+		return err
+	}
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
 	}
 }
 
 func NewInMemorry(filepath string) *InMemorry {
-	check, err := fileExist(filepath)
-	if check == false {
-		panic(err)
-	}
 	return &InMemorry{filePath: filepath}
 }
 
-func (c InMemorry) Add(hash string, object []byte) {
-	err := os.WriteFile(c.filePath, object, 0644)
-	if err != nil {
-		fmt.Errorf(err.Error())
-	}
+func (c InMemorry) pathBuilder(hash string) string {
+	return c.filePath + "/" + hash
 }
 
-func (c InMemorry) Get(hash string) {
+func (c InMemorry) getFileDescriptor(hash string, type_of_describtor int) (*os.File, error) {
+	filePath := c.pathBuilder(hash)
+	err := fileExist(filePath)
+	check(err)
 
+	file, err := os.OpenFile(filePath, type_of_describtor, 0644)
+	return file, err
+}
+
+func (c InMemorry) Add(hash string, object []byte) {
+	file, err := c.getFileDescriptor(hash, os.O_WRONLY)
+	check(err)
+	file.Write(object)
+}
+
+func (c InMemorry) Get(hash string) *bytes.Buffer {
+	buff := new(bytes.Buffer)
+	file, err := c.getFileDescriptor(hash, os.O_RDONLY)
+	check(err)
+
+	buff.ReadFrom(file)
+	check(err)
+	return buff
 }

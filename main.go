@@ -26,8 +26,11 @@ func main() {
 		print(err)
 		return
 	}
-	cache := cache.NewInMemorry("./cache_dir/cache_1")
-	cache.Add("aa", exampleBytes)
 
-	fmt.Println(string(exampleBytes))
+	cache := cache.NewInMemorry("./cache_dir")
+
+	cache.Add("aa", exampleBytes)
+	getData := cache.Get("aa")
+	fmt.Println(getData)
+
 }
