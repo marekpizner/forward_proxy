@@ -2,17 +2,24 @@ package cache
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"os"
 )
 
 type Cache interface {
-	add(string, []byte)
-	get(string)
+	Add(string, []byte)
+	Get(string) *bytes.Buffer
 }
 
 type InMemorry struct {
 	filePath string
+}
+
+func GetMD5Hash(text string) string {
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
 
 func fileExist(filepath string) error {
@@ -53,6 +60,7 @@ func (c InMemorry) getFileDescriptor(hash string, type_of_describtor int) (*os.F
 func (c InMemorry) Add(hash string, object []byte) {
 	file, err := c.getFileDescriptor(hash, os.O_WRONLY)
 	check(err)
+
 	file.Write(object)
 }
 

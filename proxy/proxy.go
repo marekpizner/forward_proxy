@@ -2,6 +2,8 @@ package proxy
 
 import (
 	"fmt"
+	"go_proxy/cache"
+
 	"io"
 	"log"
 	"net"
@@ -28,6 +30,7 @@ func handleTunneling(w http.ResponseWriter, r *http.Request) {
 	go transfer(dest_conn, client_conn)
 	go transfer(client_conn, dest_conn)
 }
+
 func transfer(destination io.WriteCloser, source io.ReadCloser) {
 	defer destination.Close()
 	defer source.Close()
@@ -51,7 +54,8 @@ func copyHeader(dst, src http.Header) {
 		}
 	}
 }
-func httpHandler() http.HandlerFunc {
+
+func httpHandler(chache cache.Cache) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodConnect {
 			fmt.Println("Tunelling!")
@@ -63,10 +67,10 @@ func httpHandler() http.HandlerFunc {
 	})
 }
 
-func RunProxy() {
+func RunProxy(chache cache.Cache, blckl *Blacklist) {
 	server := &http.Server{
 		Addr:    ":8818",
-		Handler: httpHandler(),
+		Handler: httpHandler(chache),
 		// TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 	}
 	log.Fatal(server.ListenAndServe())

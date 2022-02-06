@@ -5,3 +5,6 @@ examples/
 *.mod
 
 cache_dir/*
+
+blacklist.txt
+result.html

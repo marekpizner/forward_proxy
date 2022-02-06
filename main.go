@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"go_proxy/cache"
+	"go_proxy/proxy"
 )
 
 type ExampleConvertToByteArray struct {
@@ -13,24 +13,11 @@ type ExampleConvertToByteArray struct {
 }
 
 func main() {
-	// P.RunProxy()
-	example := ExampleConvertToByteArray{
-		Name:    "James",
-		SurName: "Camara",
-	}
-	var exampleBytes []byte
-	var err error
+	cache := cache.NewInMemorry(cacheDir)
+	blckList := proxy.NewBlacklist(blacklistPath)
 
-	exampleBytes, err = json.Marshal(example)
-	if err != nil {
-		print(err)
-		return
-	}
+	proxy.RunProxy(cache, blckList)
 
-	cache := cache.NewInMemorry("./cache_dir")
-
-	cache.Add("aa", exampleBytes)
-	getData := cache.Get("aa")
-	fmt.Println(getData)
-
+	fmt.Scanln()
+	fmt.Println("done")
 }
